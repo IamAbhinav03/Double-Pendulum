@@ -12,10 +12,11 @@ ap.add_argument("-v", "--video", help="path to the video file")
 ap.add_argument("-b", "--buffer", type=int, default=64, help="max buffer size")
 args = vars(ap.parse_args())
 
-# Initial HSV values for the blue color
+# HSV mask max and min value
 blue_lower = (23, 19, 2)
 blue_upper = (179, 255, 255)
 
+# A deque to store the point of length buffer, default 64
 pts = deque(maxlen=args['buffer'])
 
 # if a video path was not supplied, grab the reference to the webcam
@@ -33,6 +34,7 @@ time.sleep(2.0)
 paused = False
 frame_counter = 0
 
+# Sliders to change the hsv mask min and max values to fine tune the values
 # Function to get current trackbar positions
 def get_trackbar_values():
     h_lower = cv2.getTrackbarPos('H Lower', 'Control Panel')
@@ -53,19 +55,20 @@ cv2.createTrackbar('S Upper', 'Control Panel', blue_upper[1], 255, lambda x: Non
 cv2.createTrackbar('V Upper', 'Control Panel', blue_upper[2], 255, lambda x: None)
 
 while True:
-    if not paused or frame_counter == 0:
+    if not paused:
         # grab the current frame
         og_frame = vs.read()
 
         # handle the frame from VideoCapture or VideoStream
         og_frame = og_frame[1] if args.get("video", False) else og_frame
-
+        
+        # if the current frame is the last one
         if og_frame is None:
             break
 
         # resize the frame, blur it, and convert it to the hsv color space
         resized_frame = imutils.resize(og_frame, width=600)
-        blurred_frame = cv2.GaussianBlur(resized_frame, (25, 25), 0)
+        blurred_frame = cv2.GaussianBlur(resized_frame, (17, 17), 0)
         hsv_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
 
         # Get current HSV values from trackbars
@@ -108,10 +111,10 @@ while True:
     if key == ord("q"):
         break
     elif key == ord("p"):
-        cv2.waitKey(-1) 
-    elif key == ord("n") and paused:
-        frame_counter += 1
-        continue
+        cv2.waitKey(-1) # pause until any other key is pressed
+    # elif key == ord("n") and paused:
+     #   frame_counter += 1
+     #   continue
 
 if not args.get("video", False):
     vs.stop()
