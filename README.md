@@ -11,12 +11,22 @@ Code to track the movements of a double pendulum
     ```
     pip install -r requirements.txt
     ```
-* To run the tracking algorithm, run
+* To run the tracking algorithm in **real time**, using webcam run
     ```
-    python3 v1.py -v "path/to/the/video/file"
+    python3 tracking.py
     ```
 
-    * Add the -b flag to the previous command to control the number of tracking values. Default is 64
+    * To run the tracking algorithm in an video file, run the previous command with the -v or --video flag.
+
+    ```
+    python3 tracking.py -v "path/to/the/video/file"
+    ```
+
+    * Add the -b or --buffer flag to the previous command to control the number of tracking values. Default buffer value is 64, eg: 
+
+    ```
+    python3 tracking.py -b 128
+    ```
 
     * Use p to pause and play and q to quit.
 
