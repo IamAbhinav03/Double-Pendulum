@@ -6,3 +6,5 @@ WhatsApp Video 2024-07-18 at 11.57.04.mp4
 # virtual env
 tracking/
 venv/
+
+__pycache__
