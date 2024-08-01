@@ -26,13 +26,13 @@ def main():
     pts = deque(maxlen=args['buffer'])
 
     # Create control panel for trackbars
-    cv2.namedWindow('Control Panel')
-    cv2.createTrackbar('H Lower', 'Control Panel', blue_lower[0], 179, lambda x: None)
-    cv2.createTrackbar('S Lower', 'Control Panel', blue_lower[1], 255, lambda x: None)
-    cv2.createTrackbar('V Lower', 'Control Panel', blue_lower[2], 255, lambda x: None)
-    cv2.createTrackbar('H Upper', 'Control Panel', blue_upper[0], 179, lambda x: None)
-    cv2.createTrackbar('S Upper', 'Control Panel', blue_upper[1], 255, lambda x: None)
-    cv2.createTrackbar('V Upper', 'Control Panel', blue_upper[2], 255, lambda x: None)
+    # cv2.namedWindow('Control Panel')
+    # cv2.createTrackbar('H Lower', 'Control Panel', blue_lower[0], 179, lambda x: None)
+    # cv2.createTrackbar('S Lower', 'Control Panel', blue_lower[1], 255, lambda x: None)
+    # cv2.createTrackbar('V Lower', 'Control Panel', blue_lower[2], 255, lambda x: None)
+    # cv2.createTrackbar('H Upper', 'Control Panel', blue_upper[0], 179, lambda x: None)
+    # cv2.createTrackbar('S Upper', 'Control Panel', blue_upper[1], 255, lambda x: None)
+    # cv2.createTrackbar('V Upper', 'Control Panel', blue_upper[2], 255, lambda x: None)
 
     # if a video path was not supplied, grab the reference to the webcam
     if not args.get("video", False):
@@ -44,7 +44,10 @@ def main():
 
     # allow the camera or video file to warm up
     time.sleep(2.0)
-    print(f"Total no. frames in the video: {vs.get(cv2.CAP_PROP_FRAME_COUNT)}")
+    try:
+        print(f"Total no. frames in the video: {vs.get(cv2.CAP_PROP_FRAME_COUNT)}")
+    except:
+        pass
 
     # Initialize variables for playback control
     paused = False
@@ -65,7 +68,7 @@ def main():
             preprocess_frame()
 
             # Get current HSV values from trackbars
-            blue_lower, blue_upper = get_trackbar_values()
+            # blue_lower, blue_upper = get_trackbar_values()
 
             # construct a mask for the color "blue", then perform a series of dilations and erosions
             mask = mask_frame()
@@ -91,9 +94,9 @@ def main():
 
             frame_count += 1
 
-            # if frame_count % 60 == 0:  # Print FPS every 10 frames
-            #     fps = measure_fps(frame_count, start_time)
-            #     print(f"FPS: {fps:.2f}")
+            if frame_count % 60 == 0:  # Print FPS every 10 frames
+                fps = measure_fps(frame_count, start_time)
+                print(f"FPS: {fps:.2f}")
 
         key = cv2.waitKey(1) & 0xFF
 
@@ -112,15 +115,15 @@ def main():
     print(f"Main function ended in {elapsed_time}")
 
 
-def get_trackbar_values():
-    h_lower = cv2.getTrackbarPos('H Lower', 'Control Panel')
-    s_lower = cv2.getTrackbarPos('S Lower', 'Control Panel')
-    v_lower = cv2.getTrackbarPos('V Lower', 'Control Panel')
-    h_upper = cv2.getTrackbarPos('H Upper', 'Control Panel')
-    s_upper = cv2.getTrackbarPos('S Upper', 'Control Panel')
-    v_upper = cv2.getTrackbarPos('V Upper', 'Control Panel')
-    return (h_lower, s_lower, v_lower), (h_upper, s_upper, v_upper)
-
+# def get_trackbar_values():
+#     h_lower = cv2.getTrackbarPos('H Lower', 'Control Panel')
+#     s_lower = cv2.getTrackbarPos('S Lower', 'Control Panel')
+#     v_lower = cv2.getTrackbarPos('V Lower', 'Control Panel')
+#     h_upper = cv2.getTrackbarPos('H Upper', 'Control Panel')
+#     s_upper = cv2.getTrackbarPos('S Upper', 'Control Panel')
+#     v_upper = cv2.getTrackbarPos('V Upper', 'Control Panel')
+#     return (h_lower, s_lower, v_lower), (h_upper, s_upper, v_upper)
+#
 def preprocess_frame():
     global frame, hsv_frame
 
