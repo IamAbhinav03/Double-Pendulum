@@ -13,3 +13,6 @@ venv/
 
 __pycache__
 .pylintrc
+
+# vscode files
+.vscode
