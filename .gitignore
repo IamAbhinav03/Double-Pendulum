@@ -12,3 +12,4 @@ tracking/
 venv/
 
 __pycache__
+.pylintrc
