@@ -20,4 +20,4 @@ class FPS:
         return (self._end - self._start).total_seconds()
     
     def fps(self):
-        return self._num_frames / self.elapsed
+        return self._num_frames / self.elapsed()
