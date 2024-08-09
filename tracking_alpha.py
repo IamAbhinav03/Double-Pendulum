@@ -1,66 +1,66 @@
-import argparse
-import time
-import cProfile
 import cv2
-from video_processing import VideoCaptureThread, VideoProcessor, VideoDisplayThread
+import queue
+from collections import deque
+from tools.fps_counter import FPS
+import time
+from video_processing import VideoCaptureThread, FrameProcessorThread
 
+def main():
+    """
+    Main function that sets up the video capture and frame processing threads and runs the main loop.
+    """
+    source = "sample.mp4"
+    # source = 0
+    blue_lower = (102, 41, 2)
+    blue_upper = (179, 255, 255)
+    frame_queue = queue.Queue(maxsize=5)
+    processed_frame_queue = queue.Queue(maxsize=5)
 
-def main() -> None:
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Video object detection and tracking.")
-    parser.add_argument("-v", "--video", help="Path to the video file.")
-    parser.add_argument("-b", "--buffer", type=int, default=64, help="Max buffer size.")
-    args = parser.parse_args()
+    video_capture_thread = VideoCaptureThread(source, frame_queue, t=None)
+    frame_processor_thread = FrameProcessorThread(frame_queue, processed_frame_queue, blue_lower, blue_upper)
 
-    # Start video capture
-    if not args.video:
-        print("Webcam input is currently not supported.")
-        return
-    else:
-        print(f"Opening video file: {args.video}")
-        video_capture = VideoCaptureThread(source=args.video).start()
+    fps = FPS()
+    fps.start()
 
-    # Start video processing
-    video_processor = VideoProcessor(frame=video_capture.frame, buffer_size=args.buffer).start()
+    video_capture_thread.start()
+    frame_processor_thread.start()
 
+    try:
+        while True:
+            if not processed_frame_queue.empty():
+                processed_frame = processed_frame_queue.get()
+                cv2.imshow("Processed Frame", processed_frame)
+                fps.update()
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    print('stop')
+                    fps.stop()
+                    # video_capture_thread.stop()
+                    # frame_processor_thread.stop()
+                    break
+            else:
+                # print(f"processed_queue empty")
+                if video_capture_thread.stopped and frame_processor_thread.frame_queue.empty() and processed_frame_queue.empty():
+                    print("No more frames to process. Exiting.")
+                    frame_processor_thread.stop()
+                    break
+                else:
+                    time.sleep(0.01)  # Reduce CPU usage while waiting for frames
 
-    frame_count = 0
-
-    # Main loop
-    while True:
-        start_time = time.time()
-
-        if video_capture.stopped or video_processor.stopped:
-            video_capture.stop()
-            video_processor.stop()
-            break
-
-        frame = video_processor.frame
-        cv2.imshow("Processed Frame", frame)
-
-        if cv2.waitKey(1) == ord("q"):
-            print("Exiting program.")
-            break
-
-        video_processor.frame = video_capture.frame
-
-        frame_count += 1
-        if frame_count % 60 == 0:  # Print FPS every 60 frames
-            fps = measure_fps(frame_count, start_time)
-            print(f"FPS: {fps:.2f}")
-
-    cv2.destroyAllWindows()
-    elapsed_time = time.time() - start_time
-    print(f"Main function ended in {elapsed_time:.2f} seconds.")
-
-
-def measure_fps(frame_count: int, start_time: float) -> float:
-    """Calculate and return the frames per second."""
-    elapsed_time = time.time() - start_time
-    fps = frame_count / elapsed_time
-    return fps
-
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        print("Stopping video_capture_thread")
+        video_capture_thread.stop()
+        print("Stopping frame_processor_thread")
+        frame_processor_thread.stop()
+        fps.stop()
+        video_capture_thread.join()
+        frame_processor_thread.join()
+        cv2.destroyAllWindows()
+        print(f"Final FPS: {fps.fps()}")
+        print(f"Total frames processed: {fps._num_frames}")
+        # coordinates = 
+        print(f"Coordinates\n {len(frame_processor_thread.get_coordinates())}")
 
 if __name__ == "__main__":
-    # Profile the main function
-    cProfile.run('main()', 'profile_stats')
+    main()
