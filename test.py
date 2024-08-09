@@ -21,33 +21,51 @@ class Coordinate:
     def __str__(self):
         return f"({self.x}, {self.y}), {self.time}"
     
-    
+
 
 class VideoCaptureThread(threading.Thread):
     """
     A thread that captures frames from a video source and puts them in a queue.
+    If t is not None, stops capturing after 't' seconds.
     """
-    def __init__(self, source: str, frame_queue: queue.Queue):
+    def __init__(self, source: str, frame_queue: queue.Queue, t: float | None):
         super().__init__(name="VideoCaptureThread")
         self.source = source
         self.frame_queue = frame_queue
         self.cap = cv2.VideoCapture(source)
         self.stopped = False
         self._num_frames: int = 0
+        self.t = t  # Duration to capture
+        self.start_time = None
 
     def run(self):
         """
         Continuously reads frames from the video source and puts them in the frame queue.
+        Stops after 't' seconds.
         """
         print(f"{threading.current_thread().name} started.")
+        self.start_time = time.time()
+
         while not self.stopped:
+
+            if self.t is not None:
+                current_time = time.time()
+                elapsed_time = current_time - self.start_time
+
+                if elapsed_time > self.t:
+                    print(f"{threading.current_thread().name}: Reached capture time limit of {self.t} seconds.")
+                    self.stop()
+                    break
+
             ret, frame = self.cap.read()
             if not ret:
                 print(f"{threading.current_thread().name}: No more frames or error.")
                 self.stop()
                 break
+
             self.frame_queue.put(frame)
             self._num_frames += 1
+
         print(f"{threading.current_thread().name} stopped.")
 
     def stop(self):
@@ -92,9 +110,13 @@ class FrameProcessorThread(threading.Thread):
         print(f"{threading.current_thread().name} started.")
         while not self.stopped:
             if not self.frame_queue.empty():
+                # print(f"{threading.current_thread().name} getting frame to frame_queue")
                 self._frame = self.frame_queue.get()
                 self._process()
+                # print(f"{threading.current_thread().name} putting frame to processed_queue")
                 self.processed_frame_queue.put(self._display_frame)
+            # else:
+                # print(f"frame_queue empty")
         print(f"{threading.current_thread().name} stopped.")
 
     def _preprocess_frame(self):
@@ -196,7 +218,7 @@ def main():
     frame_queue = queue.Queue(maxsize=10)
     processed_frame_queue = queue.Queue(maxsize=10)
 
-    video_capture_thread = VideoCaptureThread(source, frame_queue)
+    video_capture_thread = VideoCaptureThread(source, frame_queue, t=None)
     frame_processor_thread = FrameProcessorThread(frame_queue, processed_frame_queue, blue_lower, blue_upper)
 
     fps = FPS()
@@ -218,12 +240,13 @@ def main():
                     # frame_processor_thread.stop()
                     break
             else:
+                # print(f"processed_queue empty")
                 if video_capture_thread.stopped and frame_processor_thread.frame_queue.empty() and processed_frame_queue.empty():
                     print("No more frames to process. Exiting.")
                     frame_processor_thread.stop()
                     break
-                # else:
-                #     time.sleep(0.01)  # Reduce CPU usage while waiting for frames
+                else:
+                    time.sleep(0.01)  # Reduce CPU usage while waiting for frames
 
     except Exception as e:
         print(f"Error: {e}")
