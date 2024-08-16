@@ -6,6 +6,7 @@ WhatsApp Video 2024-07-18 at 11.57.04.mp4
 120_fps_test.mp4
 120_fps_test2.mp4
 fps_test.mp4
+scratch
 
 # virtual env
 tracking/
@@ -16,3 +17,4 @@ __pycache__
 
 # vscode files
 .vscode
+
