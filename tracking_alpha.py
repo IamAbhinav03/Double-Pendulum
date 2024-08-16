@@ -8,10 +8,11 @@ from video_processing import VideoCaptureThread, FrameProcessorThread
 def main():
     """
     Main function that sets up the video capture and frame processing threads and runs the main loop.
-    """
+    # """
+    # source = "udp://localhost:1234/"
     source = "sample.mp4"
-    # source = 0
     blue_lower = (102, 41, 2)
+    # blue_lower = (94, 24, 0)    # sample2.mp4 values
     blue_upper = (179, 255, 255)
     frame_queue = queue.Queue(maxsize=5)
     processed_frame_queue = queue.Queue(maxsize=5)
@@ -54,8 +55,8 @@ def main():
         print("Stopping frame_processor_thread")
         frame_processor_thread.stop()
         fps.stop()
-        video_capture_thread.join()
-        frame_processor_thread.join()
+        # video_capture_thread.join()
+        # frame_processor_thread.join()
         cv2.destroyAllWindows()
         print(f"Final FPS: {fps.fps()}")
         print(f"Total frames processed: {fps._num_frames}")
