@@ -37,6 +37,7 @@ class VideoCaptureThread(threading.Thread):
         self._num_frames: int = 0
         self.t = t  # Duration to capture
         self.start_time = None
+        self.fps = FPS()
 
     def run(self):
         """
@@ -45,7 +46,9 @@ class VideoCaptureThread(threading.Thread):
         """
         print(f"{threading.current_thread().name} started.")
         self.start_time = time.time()
+        prev_frame = None
 
+        self.fps.start()
         while not self.stopped:
 
             if self.t is not None:
@@ -57,11 +60,36 @@ class VideoCaptureThread(threading.Thread):
                     self.stop()
                     break
 
+            # start_time = time.time()
             ret, frame = self.cap.read()
+            # end_time = time.time()
+            # print(f"time taken for reading {end_time - start_time}")
+            self.fps.update()
             if not ret:
                 print(f"{threading.current_thread().name}: No more frames or error.")
                 self.stop()
                 break
+
+            if prev_frame is None:
+                prev_frame = frame
+
+            else:
+                if np.array_equal(prev_frame, frame):
+                    print("Duplicate frame detected!")
+                else:
+                    # print("no duplicate frame")
+                    prev_frame = frame
+
+            # fps = self.cap.get(cv2.CAP_PROP_FPS)
+            # print(f"Video fps: {fps}")
+
+
+
+            # if expected_frame_number != actual_frame_number:
+            #     print(f"Skipped frames detected: Expected {expected_frame_number}, but got {actual_frame_number}")
+
+            # expected_frame_number += 1
+
 
             self.frame_queue.put(frame)
             self._num_frames += 1
@@ -72,6 +100,8 @@ class VideoCaptureThread(threading.Thread):
         """
         Stops the video capture thread.
         """
+        self.fps.stop()
+        print(f"cpt fps: {self.fps.fps()}")
         self.stopped = True
         print(f"CaptureThread processed {self._num_frames} frames.")
         if self.cap.isOpened():
@@ -112,6 +142,7 @@ class FrameProcessorThread(threading.Thread):
             if not self.frame_queue.empty():
                 # print(f"{threading.current_thread().name} getting frame to frame_queue")
                 self._frame = self.frame_queue.get()
+                # self._display_frame = self._frame
                 self._process()
                 # print(f"{threading.current_thread().name} putting frame to processed_queue")
                 self.processed_frame_queue.put(self._display_frame)
@@ -164,16 +195,28 @@ class FrameProcessorThread(threading.Thread):
             moments = cv2.moments(largest_contour)
             center = (int(moments["m10"] / moments["m00"]), int(moments["m01"] / moments["m00"]))
 
-            if radius > 1:
-                if self._frame is not None:
-                    cv2.circle(self._display_frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-                    cv2.circle(self._display_frame, center, 5, (0, 0, 255), -1)
-                    # Calculate coordinates relative to origin
-                    x = center[0] - self._origin[0]
-                    y = self._origin[1] - center[1]  # Invert Y-axis
-                    self._coordinate_array.append(Coordinate(x=x, y=y, time=time.time()))
+            # if radius > 1:
+            #     if self._frame is not None:
+            #         cv2.circle(self._display_frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+            #         cv2.circle(self._display_frame, center, 5, (0, 0, 255), -1)
+            #         # Calculate coordinates relative to origin
+            #         x = center[0] - self._origin[0]
+            #         y = self._origin[1] - center[1]  # Invert Y-axis
+            #         self._coordinate_array.append(Coordinate(x=x, y=y, time=time.time()))
+            #
+            # self._pts.appendleft(center)
+            #
+
+            if self._frame is not None:
+                cv2.circle(self._display_frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+                cv2.circle(self._display_frame, center, 5, (0, 0, 255), -1)
+                # Calculate coordinates relative to origin
+                x = center[0] - self._origin[0]
+                y = self._origin[1] - center[1]  # Invert Y-axis
+                self._coordinate_array.append(Coordinate(x=x, y=y, time=time.time()))
 
             self._pts.appendleft(center)
+
 
     def _draw_path(self):
         """
@@ -206,60 +249,3 @@ class FrameProcessorThread(threading.Thread):
 
     def get_coordinates(self):
         return self._coordinate_array
-
-def main():
-    """
-    Main function that sets up the video capture and frame processing threads and runs the main loop.
-    """
-    source = "sample.mp4"
-    # source = 0
-    blue_lower = (102, 41, 2)
-    blue_upper = (179, 255, 255)
-    frame_queue = queue.Queue(maxsize=10)
-    processed_frame_queue = queue.Queue(maxsize=10)
-
-    video_capture_thread = VideoCaptureThread(source, frame_queue, t=None)
-    frame_processor_thread = FrameProcessorThread(frame_queue, processed_frame_queue, blue_lower, blue_upper)
-
-    fps = FPS()
-    fps.start()
-
-    video_capture_thread.start()
-    frame_processor_thread.start()
-
-    try:
-        while True:
-            if not processed_frame_queue.empty():
-                processed_frame = processed_frame_queue.get()
-                cv2.imshow("Processed Frame", processed_frame)
-                fps.update()
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    print('stop')
-                    fps.stop()
-                    # video_capture_thread.stop()
-                    # frame_processor_thread.stop()
-                    break
-            else:
-                # print(f"processed_queue empty")
-                if video_capture_thread.stopped and frame_processor_thread.frame_queue.empty() and processed_frame_queue.empty():
-                    print("No more frames to process. Exiting.")
-                    frame_processor_thread.stop()
-                    break
-                else:
-                    time.sleep(0.01)  # Reduce CPU usage while waiting for frames
-
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        print("Stopping video_capture_thread")
-        video_capture_thread.stop()
-        print("Stopping frame_processor_thread")
-        frame_processor_thread.stop()
-        fps.stop()
-        video_capture_thread.join()
-        frame_processor_thread.join()
-        cv2.destroyAllWindows()
-        print(f"Final FPS: {fps.fps()}")
-        print(f"Total frames processed: {fps._num_frames}")
-        # coordinates = 
-        print(f"Coordinates\n {len(frame_processor_thread.get_coordinates())}")
