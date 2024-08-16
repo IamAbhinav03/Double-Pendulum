@@ -9,15 +9,20 @@ class FPS:
 
     def start(self):
         self._start = datetime.datetime.now()
+        print(f"fps.start time {self._start}")
         
     def stop(self):
         self._end = datetime.datetime.now()
+        print(f"fps.stop time {self._end}")
 
     def update(self):
         self._num_frames += 1
 
     def elapsed(self):
+        print(f"fps.elapsed.start = {self._start}")
+        print(f"fps.elapsed.end = {self._end}")
         return (self._end - self._start).total_seconds()
+
     
     def fps(self):
         return self._num_frames / self.elapsed()
