@@ -27,9 +27,9 @@ class VideoCaptureThread(threading.Thread):
         self._source = source
         self._frames_queue = queue.Queue(maxsize=10)
         self.stop_event = threading.Event()
-        self._cap = cv2.VideoCapture(self._source)
+        self._cap = cv2.VideoCapture(self._source, cv2.CAP_FFMPEG)
         self.exception = None
-        time.sleep(2.0)
+        time.sleep(5.0)
         print("Initialized Capture object")
 
     def run(self):
@@ -44,6 +44,7 @@ class VideoCaptureThread(threading.Thread):
                     self._frames_queue.put(frame)
                 else:
                     print("Issue grabbing frame, restarting capture device")
+                    self._cap.release()
                     self._cap = cv2.VideoCapture(self._source)
                     # self.stop()
                     # break
@@ -53,9 +54,18 @@ class VideoCaptureThread(threading.Thread):
             self.stop()
 
     def stop(self):
+        print("Stopping Video Capture thread")
         self.stop_event.set()
         if self._cap.isOpened():
-            self._cap.release()
+            print("releasing cap object")
+            try:
+                self._cap.release()
+                print("cap released")
+            except Exception as e:
+                print("ERROR")
+                raise RuntimeError(f"e")
+        else:
+            print("cap is not oppend")
 
     def get_exception(self):
         return self.exception
@@ -77,7 +87,7 @@ class FrameProcessorThread(threading.Thread):
                     print("Fetching frames from frame queue")
                     frame = self.frames_queue.get()
                     bits = self._process(frame)
-                    print(f"bits: {bits}")
+                    # print(f"bits: {bits}")
                     if len(bits) > 0:
                         print("Inserting bits to the bits queue")
                         self.bits_queue.put(bits)
@@ -110,6 +120,7 @@ class FrameProcessorThread(threading.Thread):
         return "00"
 
     def stop(self):
+        print("Setting frame processing stop event")
         self.stop_event.set()
 
     def get_exception(self):

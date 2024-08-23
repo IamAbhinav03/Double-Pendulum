@@ -18,14 +18,14 @@ class SeedRequest(BaseModel):
     bit_length: int
 
 @app.post("/generate-seed")
-async def generate_seed(request: SeedRequest):
+def generate_seed(request: SeedRequest):
     bit_length = request.bit_length
 
     if bit_length <= 0:
         raise HTTPException(status_code=400, detail="bit_length must be greater than 0")
     
     generator = SeedGenerator(bit_length)
-    generator.start_processing('sample.mp4')
+    generator.start_processing('udp://127.0.0.1:5000/?overrun_nonfatal=1')
 
     try:
         seed = generator.request_seed()

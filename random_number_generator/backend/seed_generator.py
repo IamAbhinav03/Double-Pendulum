@@ -1,5 +1,8 @@
 import time
+from threading import Lock
 from video_processing import VideoCaptureThread, FrameProcessorThread
+
+lock = Lock()
 
 class SeedGenerator:
     def __init__(self, bit_length: int) -> None:
@@ -13,6 +16,8 @@ class SeedGenerator:
             if not self._processor_thread.bits_queue.empty():
                 self._captured_bits += self._processor_thread.bits_queue.get()
             if self._processor_thread.get_exception() or self._capture_thread.get_exception():
+                print(f"{self._processor_thread.get_exception()}")
+                print(f"{self._capture_thread.get_exception()}")
                 raise RuntimeError("An error occurred in one of the threads")
         return self._captured_bits[:self._bit_length]
     
@@ -26,14 +31,16 @@ class SeedGenerator:
         self._processor_thread.start()
 
     def stop_processing(self):
+        print("stoping process")
         if self._capture_thread:
+            print("stopping capture thread")
             self._capture_thread.stop()
-            self._capture_thread.join()
+            # self._capture_thread.join()
 
         if self._processor_thread:
+            print("stopping processor thread")
             self._processor_thread.stop()
-            self._processor_thread.join()
-
+            # self._processor_thread.join()
         if self._capture_thread.get_exception():
             raise self._capture_thread.get_exception()
 
