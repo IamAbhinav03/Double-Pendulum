@@ -42,11 +42,12 @@ class VideoCaptureThread(threading.Thread):
         Stops if an error occurs or the stop event is set.
         """
         print("Running capture thread")
-        try:
-            if not self._cap.isOpened():  # Check if the video capture opened successfully
-                raise RuntimeError("Error starting capture device")
+        print(f"{__name__}: STOP_EVENT: {self.stop_event.is_set()}")
+        if not self.stop_event.is_set():
+            try:
+                if not self._cap.isOpened():  # Check if the video capture opened successfully
+                    raise RuntimeError("Error starting capture device")
 
-            while not self.stop_event.is_set():  # Keep capturing frames until we are told to stop
                 ret, frame = self._cap.read()  # Read a frame from the video source
                 if ret:  # If the frame was read successfully
                     self._frames_queue.put(frame)  # Add the frame to the queue
@@ -55,9 +56,9 @@ class VideoCaptureThread(threading.Thread):
                     self._cap.release()  # Release the current video capture
                     self._cap = cv2.VideoCapture(self._source)  # Reopen the video capture
 
-        except Exception as e:
-            self.exception = e  # Store any exception that occurs
-            self.stop()  # Stop the thread if an error occurs
+            except Exception as e:
+                self.exception = e  # Store any exception that occurs
+                self.stop()  # Stop the thread if an error occurs
 
     def stop(self) -> None:
         """
