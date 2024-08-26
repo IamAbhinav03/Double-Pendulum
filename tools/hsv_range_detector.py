@@ -27,15 +27,17 @@ hMin = sMin = vMin = hMax = sMax = vMax = 0
 phMin = psMin = pvMin = phMax = psMax = pvMax = 0
 
 
-img = cv2.imread('Screenshot 2024-07-22 at 8.01.32 PM.png')
-img = imutils.resize(img, width=600)
-img = cv2.GaussianBlur(img, (11, 11), 0)
-
-output = img
-waitTime = 33
+vs = cv2.VideoCapture(0)
 
 while(1):
+    ret, img = vs.read()
+    if not ret:
+        break
+    img = imutils.resize(img, width=600)
+    img = cv2.GaussianBlur(img, (11, 11), 0)
 
+    output = img
+    waitTime = 33
     # get current positions of all trackbars
     hMin = cv2.getTrackbarPos('HMin','image')
     sMin = cv2.getTrackbarPos('SMin','image')
