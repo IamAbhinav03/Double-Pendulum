@@ -173,4 +173,4 @@ def main():
 
 if __name__ == "__main__":
     # Profile the main function
-    main()
+    cProfile.run('main()', 'profile_stats')
