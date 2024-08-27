@@ -8,7 +8,7 @@ import os
 # Add the src directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.seed_generation import (
+from random_number_generator_tarush.seed_generation import (
     float_to_fixed_point,
     interleave_bits,
     hash_interleaved_bits,

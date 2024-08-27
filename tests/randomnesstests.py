@@ -7,13 +7,13 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.seed_generation import (
+from random_number_generator_tarush.seed_generation import (
     float_to_fixed_point,
     interleave_bits,
     hash_interleaved_bits,
     generate_seed)
 from config import PENDULUM_POINTS_BUFFER
-from src.rsa_number_generator import rsa_rabin_generator 
+from random_number_generator_tarush.rsa_number_generator import rsa_rabin_generator 
 
 class TestRandomGenerator(unittest.TestCase):
     

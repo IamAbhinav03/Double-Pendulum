@@ -6,9 +6,9 @@ import os
 # Add the project root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.pendulum_tracker import PendulumTracker
-from src.seed_generation import generate_seed
-from src.rsa_number_generator import get_rsa_rabin_generator
+from random_number_generator_tarush.pendulum_tracker import PendulumTracker
+from random_number_generator_tarush.seed_generation import generate_seed
+from random_number_generator_tarush.rsa_number_generator import get_rsa_rabin_generator
 from config import PENDULUM_POINTS_BUFFER, RANDOM_NUMBER_MODULUS
 
 class IntegrationTests(unittest.TestCase):

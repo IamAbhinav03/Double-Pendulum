@@ -12,8 +12,8 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 sys.path.append(script_dir)
 
-from src.pendulum_tracker import PendulumTracker
-from src.rsa_number_generator import get_rsa_rabin_generator
+from random_number_generator_tarush.pendulum_tracker import PendulumTracker
+from random_number_generator_tarush.rsa_number_generator import get_rsa_rabin_generator
 from config import BLUE_LOWER, BLUE_UPPER, RANDOM_NUMBERS_PER_FRAME
 
 def setup_logging():
