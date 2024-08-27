@@ -9,8 +9,8 @@ def main():
     """
     Main function that sets up the video capture and frame processing threads and runs the main loop.
     # """
-    # source = "udp://localhost:1234/"
-    source = "sample.mp4"
+    source = "udp://127.0.0.1:5000"
+    # source = "sample.mp4"
     blue_lower = (102, 41, 2)
     # blue_lower = (94, 24, 0)    # sample2.mp4 values
     blue_upper = (179, 255, 255)
