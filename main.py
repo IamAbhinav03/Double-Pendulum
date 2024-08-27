@@ -14,7 +14,7 @@ sys.path.append(script_dir)
 
 from random_number_generator_tarush.pendulum_tracker import PendulumTracker
 from random_number_generator_tarush.rsa_number_generator import get_rsa_rabin_generator
-from config import BLUE_LOWER, BLUE_UPPER, RANDOM_NUMBERS_PER_FRAME
+from random_number_generator_tarush.config import BLUE_LOWER, BLUE_UPPER, RANDOM_NUMBERS_PER_FRAME
 
 def setup_logging():
     logging.basicConfig(filename='pendulum_output.log', level=logging.INFO, 

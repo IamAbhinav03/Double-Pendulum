@@ -12,7 +12,7 @@ from random_number_generator_tarush.seed_generation import (
     interleave_bits,
     hash_interleaved_bits,
     generate_seed)
-from config import PENDULUM_POINTS_BUFFER
+from random_number_generator_tarush.config import PENDULUM_POINTS_BUFFER
 from random_number_generator_tarush.rsa_number_generator import rsa_rabin_generator 
 
 class TestRandomGenerator(unittest.TestCase):

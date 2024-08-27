@@ -5,7 +5,7 @@ import imutils
 from imutils.video import VideoStream
 from tools.fps_counter import FPS
 from config import PENDULUM_POINTS_BUFFER
-from random_number_generator_tarush.seed_generation import generate_seed
+from seed_generation import generate_seed
 
 class PendulumTracker:
     def __init__(self, args, blue_lower, blue_upper):
