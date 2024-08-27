@@ -9,11 +9,11 @@ class FPS:
 
     def start(self):
         self._start = datetime.datetime.now()
-        print(f"fps.start time {self._start}")
+        # print(f"fps.start time {self._start}")
         
     def stop(self):
         self._end = datetime.datetime.now()
-        print(f"fps.stop time {self._end}")
+        # print(f"fps.stop time {self._end}")
 
     def update(self):
         self._num_frames += 1
