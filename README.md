@@ -2,7 +2,7 @@
 
 Code to track the movements of a double pendulum
 
-** The branch is to meant to be a branch where the working features from scratch spaces are pulled and rigorously tested before pushing to main**
+**The branch is to meant to be a branch where the working features from scratch spaces are pulled and rigorously tested before pushing to main**
 # How to use
 
 - Clone the repo
