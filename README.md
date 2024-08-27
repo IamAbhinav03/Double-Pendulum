@@ -5,7 +5,7 @@ Code to track the movements of a double pendulum
 
 This branch is meant to be a scratch space to test out the server code. **You have to install ffmpeg to use the code with a stream**
 
-**Stuff to do before running the code**
+# Stuff to do before running the code 
 
 - Clone the repo
 - Create a python virtual environment
@@ -18,14 +18,14 @@ This branch is meant to be a scratch space to test out the server code. **You ha
   ```
 
 
-**Setting up the ffmpeg sever**
+# Setting up the ffmpeg sever
 ```
 ffmpeg -stream_loop -1 -re -i <path_to_your_video_file/device> -preset ultrafast -vcodec libx264 -tune zerolatency -b:v 900k -f h264 udp://127.0.0.1:5000\?overrun_nonfatal=1
 ```
 
 **The server code is the folder random_number_generator**
 
-**How to run the server**
+# Running the fastapi server
 
 *Change the source in main.py line 36 to use other sources ```generator.start_processing('udp://127.0.0.1:5000/')```*
 
